@@ -1,0 +1,195 @@
+/* Reset Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #6e0dad, #23074d);
+    color: white;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar a, .nav-item > a {
+    text-decoration: none;
+    color: white;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.navbar a:hover, .nav-item > a:hover {
+    color: #ffbf00;
+    transform: scale(1.1);
+}
+
+/* Dropdown Menu */
+.nav-item {
+    position: relative;
+}
+
+.nav-item:hover .dropdown {
+    display: block;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    background-color: #290042;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown a {
+    color: rgb(247, 251, 236);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {
+    background-color: #575757;
+}
+
+/* Hero Section */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 50px;
+    background: linear-gradient(135deg, rgba(255, 91, 91, 0.6), rgba(114, 75, 217, 0.7));
+    overflow: hidden;
+    position: relative;
+}
+
+.hero .content {
+    max-width: 50%;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.hero p {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.hero .btn {
+    background: #ffbf00;
+    color: #23074d;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero .btn:hover {
+    background: #d4a000;
+    transform: translateY(-4px);
+}
+
+.hero .btn:active {
+    transform: translateY(2px);
+}
+
+/* Decorative Shapes */
+.shapes {
+    position: relative;
+    max-width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s;
+}
+
+.shape:hover {
+    transform: scale(1.1);
+}
+
+.shape.circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: 50px;
+    left: 100px;
+}
+
+.shape.triangle {
+    width: 0;
+    height: 0;
+    border-left: 120px solid transparent;
+    border-right: 120px solid transparent;
+    border-bottom: 240px solid rgba(255, 255, 255, 0.1);
+    top: 200px;
+    left: -50px;
+}
+
+.shape.square {
+    width: 140px;
+    height: 140px;
+    top: 250px;
+    left: 250px;
+    background: rgba(255, 255, 255, 0.15);
+    transform: rotate(45deg);
+}
+
+.shape.dotted {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 80%);
+    top: 120px;
+    left: 350px;
+}
+
+.shape.hexagon {
+    width: 120px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.1);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    top: 350px;
+    left: 150px;
+}
+
+.shape.pentagon {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
+    top: 100px;
+    left: 450px;
+}
