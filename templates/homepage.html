@@ -3,19 +3,37 @@
 {% block title %}Home - LMS Portal{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <div class="content">
-        <h1>Building the Future!<br> Skills.<br>Progress.<br>Success.</h1>
+<section class="hero" style="width: 100vw; max-width: 100%; padding: 50px 0; text-align: center;">
+    <div class="content" style="width: 90%; margin: 0 auto;">
+        <h1>Building the Future!</h1>
+        <h2 style="font-size: 3rem;"> Skills.<br>Progress.<br>Success.</h2>
         <p>Hey engineers! Struggling to turn all that overwhelming info into a career that rocks? We've got your back. Our Student Partner LMS is here to power your journey with personalized roadmaps, hands-on skill-building, and awesome mentorship. Ready to go from classroom to career with confidence? Let's make your engineering dreams a reality!</p>
         <a href="{{ url_for('digital_footprints') }}" class="btn">Get Started</a>
     </div>
-    <div class="shapes">
-        <div class="shape circle"></div>
-        <div class="shape triangle"></div>
-        <div class="shape square"></div>
-        <div class="shape dotted"></div>
-        <div class="shape hexagon"></div>
-        <div class="shape pentagon"></div>
+</section>
+
+<section class="cards-section">
+    <div class="cards-container">
+        <div class="card">
+            <h4>Personalized Roadmaps</h4>
+            <p>Get a structured learning path tailored just for you.</p>
+            <a href="#" class="btn">Explore</a>
+        </div>
+        <div class="card">
+            <h4>Hands-on Projects</h4>
+            <p>Work on real-world projects to gain practical experience.</p>
+            <a href="#" class="btn">Get Started</a>
+        </div>
+        <div class="card">
+            <h4>Expert Mentorship</h4>
+            <p>Receive guidance from industry professionals.</p>
+            <a href="#" class="btn">Learn More</a>
+        </div>
+        <div class="card">
+            <h4>Career Support</h4>
+            <p>Prepare for your dream job with our career resources.</p>
+            <a href="#" class="btn">Join Now</a>
+        </div>
     </div>
 </section>
 {% endblock %}

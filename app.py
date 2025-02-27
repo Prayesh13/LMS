@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import sqlite3
 
 app = Flask(__name__)
 
@@ -11,9 +12,25 @@ def home():
 def digital_footprints():
     return render_template('digital_footprints.html')
 
-@app.route('/core-skills')
+# Function to get subjects from SQLite
+def get_subjects(branch, semester):
+    conn = sqlite3.connect('lms_portal.db')
+    conn.row_factory = sqlite3.Row  # Enable dictionary-like row access
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, resources FROM subjects WHERE branch = ? AND semester = ?", (branch, semester))
+    subjects = cursor.fetchall()
+    conn.close()
+    return subjects
+
+@app.route('/core_skills', methods=['GET', 'POST'])
 def core_skills():
-    return render_template('core_skills.html')
+    subjects = []
+    if request.method == 'POST':
+        branch = request.form.get('branch')
+        semester = request.form.get('semester')
+        if branch and semester:
+            subjects = get_subjects(branch, semester)
+    return render_template('core_skills.html', subjects=subjects)
 
 @app.route('/process-management')
 def process_management():
@@ -63,4 +80,4 @@ def subjects_and_courses():
     return render_template('subjects_courses.html', departments=departments, years=years)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

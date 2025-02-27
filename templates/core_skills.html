@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}Core Skills - LMS Portal{% endblock %}
+
+{% block content %}
+<section class="core-skills">
+    <div class="container">
+        <h1>Explore Core Skills</h1>
+        <p>Select your branch and semester to view subjects and resources.</p>
+        
+        <form id="selection-form" method="POST">
+            <label for="branch">Select Branch:</label>
+            <select id="branch" name="branch">
+                <option value="">--Choose Branch--</option>
+                <option value="cse">Computer Science</option>
+                <option value="ece">Electronics and Communication</option>
+                <option value="mech">Mechanical</option>
+                <option value="civil">Civil</option>
+                <option value="ee">Electrical</option>
+            </select>
+
+            <label for="semester">Select Semester:</label>
+            <select id="semester" name="semester">
+                <option value="">--Choose Semester--</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+            </select>
+
+            <button type="submit">View Subjects</button>
+        </form>
+
+        <div id="subjects-container" class="subjects-container">
+            {% if subjects %}
+                {% for subject in subjects %}
+                    <div class="card">
+                        <h4>{{ subject.name }}</h4>
+                        <a href="{{ subject.resources }}" target="_blank">View Resources</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No subjects found for the selected branch and semester.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
