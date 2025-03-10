@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+
+{% block title %}Communication Skills{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br><br>
+        <h2>Recommended Videos for Improving Communication Skills</h2>
+        <p>Enhance your communication skills with these handpicked YouTube videos.</p>
+        
+        <div class="videos-container">
+            {% for video in videos %}
+                <div class="video-card">
+                    <h4>{{ video.title }}</h4>
+                    <h5>{{ video.Channel }}</h5>
+                    <a href="{{ video.url }}" target="_blank" class="btn">Watch Video</a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <br><br>
+        <h2>Recommended Blogs & Websites</h2>
+        <div class="resources-container">
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='mind_tools_logo.jpeg') }}" alt="MindTools">
+                <h4>MindTools</h4>
+                <p>Offers communication strategies for professionals.</p>
+                <a href="https://www.mindtools.com" target="_blank" class="btn">Visit</a>
+            </div>
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='Harvard_business_review.jpg') }}" alt="HBR">
+                <h4>Harvard Business Review (HBR)</h4>
+                <p>Articles on leadership and communication.</p>
+                <a href="https://hbr.org" target="_blank" class="btn">Visit</a>
+            </div>
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='skillsyouneed.jpg') }}" alt="SkillsYouNeed">
+                <h4>SkillsYouNeed</h4>
+                <p>Free guides on communication skills.</p>
+                <a href="https://www.skillsyouneed.com" target="_blank" class="btn">Visit</a>
+            </div>
+        </div>
+
+        <br><br>
+        <h2>Free Course on Communication Skills</h2>
+        <p>Check out this <a href="https://www.alexanderlyon.com/free-resources" target="_blank" class="btn">free course</a> by Alexander Lyon to improve your communication skills.</p>
+    </div>
+    <br><br>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .videos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .video-card, .resource-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .video-card h4, .resource-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        
+        .resources-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .resource-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .resource-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 30%;
+        }
+    </style>
+{% endblock %}

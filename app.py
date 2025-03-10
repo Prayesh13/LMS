@@ -30,9 +30,10 @@ def course_recommendation():
 def communication_skills():
     # Placeholder for recommending YouTube videos
     videos = [
-        {"title": "How to Improve Communication Skills", "url": "https://www.youtube.com/watch?v=1z5f1x1CzxI"},
-        {"title": "Effective Communication for Professionals", "url": "https://www.youtube.com/watch?v=2pHXzWjOY7U"},
-        {"title": "Mastering Workplace Communication", "url": "https://www.youtube.com/watch?v=3HYf5cK6fU"}
+        {"title": "Communication Skills - The 6 Keys Of Powerful Communication", "url": "https://youtu.be/XCc6-qr0Gww?si=GaGwLr_o_R7QZ-hf","Channel": "Actualized.org"},
+        {"title": "Communication Skills SIMPLIFIED: A Step-by-Step Roadmap for Success", "url": "https://youtu.be/X3Fz_Gu5WUE?si=Id0rhYkGljNQzUPY","Channel": "Simerjeet Singh"},
+        {"title": "TOP 3 Tips To Improve Your Communication Skills!", "url": "https://youtu.be/LsyfrGnBL4c?si=sF5Zii9h4nTBy_ai","Channel": "Vanessa Van Edwards"},
+        {"title": "Effective Communication Skills", "url": "https://youtu.be/6pYSbdGiDYw?si=_rxUHf3Jdz5y7ESf","Channel": "Communication Coach Alexander Lyon"}
     ]
     return render_template('communication_skills.html', videos=videos)
 
