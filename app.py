@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from recommendation_skills_coursera import recommend_courses_pipeline
+from recomm_udemy import hybrid_recommendation
 
 app = Flask(__name__)
 
@@ -34,6 +35,30 @@ def communication_skills():
         {"title": "Mastering Workplace Communication", "url": "https://www.youtube.com/watch?v=3HYf5cK6fU"}
     ]
     return render_template('communication_skills.html', videos=videos)
+
+
+@app.route('/udemy-recommendation', methods=['GET', 'POST'])
+def udemy_recommendation():
+    recommended_courses = None
+    user_query = ""
+    user_subject = ""
+    user_level = ""
+
+    if request.method == 'POST':
+        # Get user inputs from form
+        user_query = request.form.get('course_title')  
+        user_subject = request.form.get('subject')
+        user_level = request.form.get('level')
+        
+        if user_query and user_subject and user_level:
+            # Assuming `recommend_udemy_courses` is a function that returns recommended courses based on the input
+            recommended_courses = hybrid_recommendation(user_query, user_subject, user_level, top_n=6)
+    
+    return render_template('udemy_recommendation.html', 
+                           courses=recommended_courses, 
+                           user_query=user_query, 
+                           user_subject=user_subject, 
+                           user_level=user_level)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

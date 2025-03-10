@@ -1,0 +1,144 @@
+{% extends 'layout.html' %}
+
+{% block title %}Udemy Course Recommendation{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <h2>Enter Course Preferences</h2>
+        <br>
+        <form method="post" class="form">
+            <!-- Subject Dropdown -->
+            <label for="subject">Subject:</label>
+            <select name="subject" id="subject" required>
+                <option value="">Select Subject</option>
+                <option value="business finance">Business Finance</option>
+                <option value="graphic design">Graphic Design</option>
+                <option value="musical instruments">Musical Instruments</option>
+                <option value="web development">Web Development</option>
+            </select>
+
+            <!-- Level Dropdown -->
+            <label for="level">Level:</label>
+            <select name="level" id="level" required>
+                <option value="">Select Level</option>
+                <option value="all levels">All Levels</option>
+                <option value="intermediate level">Intermediate Level</option>
+                <option value="beginner level">Beginner Level</option>
+                <option value="expert level">Expert Level</option>
+            </select>
+
+            <!-- Course Title Input -->
+            <label for="course_title">Course Title:</label>
+            <input type="text" name="course_title" id="course_title" placeholder="Enter Course Title"
+                   value="{{ request.form['course_title'] if request.method == 'POST' else '' }}" required>
+
+            <button type="submit"><h3>Get Recommendations</h3></button>
+        </form>
+
+        <br>
+        {% if courses is not none %}
+            <h3>Recommended Courses (Udemy)</h3>
+            <div class="cards-container">
+                {% for index, course in courses.iterrows() %}
+                    <div class="card">
+                        <h4>{{ course["course_title"] | title }}</h4>
+                        <p><strong>Subject:</strong> {{ course["subject"] }}</p>
+                        <p><strong>Paid:</strong> {{ 'Yes' if course["is_paid"] else 'No' }}</p>
+                        <p><strong>Price:</strong> ${{ course["price"] }}</p>
+                        <p><strong>Level:</strong> {{ course["level"] }}</p>
+
+                        <a href="{{ course['url'] }}" target="_blank" class="btn">Course Link</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>Disclaimer:</strong> Please note that the prices and course details displayed here are based on past data. Current prices and availability may differ. Always verify the details directly on the official website.</p>
+    </div>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .form select, .form input {
+            padding: 10px;
+            width: 70%;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .form button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);  /* 3 cards per row */
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            height: 380px; /* Set card height */
+            position: relative;  /* Make sure button stays fixed */
+            overflow: hidden;
+        }
+
+        .card h4 {
+            margin: 0 0 10px;
+            color: #333; /* Adjusted color for headings */
+        }
+
+        .card p {
+            color: #555; /* Adjusted color for paragraphs */
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            position: absolute;
+            bottom: 15px;  /* Fix the button at the bottom */
+            left: 15px;
+            width: calc(100% - 30px);  /* Make button full width minus padding */
+        }
+
+        .disclaimer {
+            margin-top: 40px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .disclaimer p {
+            margin: 0;
+        }
+    </style>
+{% endblock %}
