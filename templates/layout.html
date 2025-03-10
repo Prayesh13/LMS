@@ -10,17 +10,19 @@
     <!-- Navbar -->
     <header class="navbar">
         <div class="logo">
-            <h1>MentorX</h1>
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='esp_logo.png') }}" alt="ESP Logo">
+            </a>
         </div>
         <nav class="nav-links">
             <a href="{{ url_for('home') }}">Home</a>
             <div class="nav-item">
                 <a href="#services">Services</a>
                 <div class="dropdown">
-                    <a href="{{ url_for('digital_footprints') }}">Digital footprint</a>
-                    <a href="{{ url_for('course_recommendation') }}">Course Recommendation</a>
-                    <a href="{{ url_for('udemy_recommendation') }}">Udemy</a>
-                    <a href="{{ url_for('communication_skills') }}">Comm. skills</a>
+                    <a href="{{ url_for('digital_footprints') }}">Digital Footprint</a>
+                    <a href="{{ url_for('course_recommendation') }}">Coursera Course Recommendation</a>
+                    <a href="{{ url_for('udemy_recommendation') }}">Udemy Course Recommendation</a>
+                    <a href="{{ url_for('communication_skills') }}">Comm. Skills</a>
                 </div>
             </div>
             <a href="#about">About Us</a>
@@ -32,5 +34,96 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    <style>
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #D4AF37, #B76E79, #3B3B6D);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Fixed Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #B76E79, #3B3B6D);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar .logo img {
+            height: 50px; /* Adjust size as needed */
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #D4AF37;
+            border-radius: 5px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            background: #444;
+            min-width: 200px;
+            top: 100%;
+            left: 0;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-item:hover .dropdown {
+            display: block;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .dropdown a:hover {
+            background: #555;
+        }
+
+        /* Ensure content does not overlap the navbar */
+        main {
+            margin-top: 80px;
+            padding: 20px;
+        }
+    </style>
 </body>
 </html>
