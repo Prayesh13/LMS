@@ -10,7 +10,7 @@
     <!-- Navbar -->
     <header class="navbar">
         <div class="logo">
-            <h1>MentorX</h1>
+            <img src="{{ url_for('static', filename='esp_logo.png') }}" alt="ESP Logo" style="height: 50px;">
         </div>
         <nav class="nav-links">
             <a href="{{ url_for('home') }}">Home</a>
@@ -18,8 +18,8 @@
                 <a href="#services">Services</a>
                 <div class="dropdown">
                     <a href="{{ url_for('digital_footprints') }}">Digital footprint</a>
-                    <a href="{{ url_for('course_recommendation') }}">Course Recommendation</a>
-                    <a href="{{ url_for('udemy_recommendation') }}">Udemy</a>
+                    <a href="{{ url_for('course_recommendation') }}">Coursera Course Recommendation</a>
+                    <a href="{{ url_for('udemy_recommendation') }}">Udemy Course Recommendation</a>
                     <a href="{{ url_for('communication_skills') }}">Comm. skills</a>
                 </div>
             </div>
@@ -27,6 +27,7 @@
             <a href="#contact">Contact</a>
         </nav>
     </header>
+    
 
     <!-- Main Content -->
     <main>

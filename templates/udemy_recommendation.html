@@ -9,7 +9,7 @@
         <br>
         <form method="post" class="form">
             <!-- Subject Dropdown -->
-            <label for="subject">Subject:</label>
+            <label for="subject"><b>Subject:</b></label>
             <select name="subject" id="subject" required>
                 <option value="">Select Subject</option>
                 <option value="business finance">Business Finance</option>
@@ -18,8 +18,8 @@
                 <option value="web development">Web Development</option>
             </select>
 
-            <!-- Level Dropdown -->
-            <label for="level">Level:</label>
+            <!-- Level Dropdown --><br>
+            <label for="level"><b>Level:</b></label>
             <select name="level" id="level" required>
                 <option value="">Select Level</option>
                 <option value="all levels">All Levels</option>
@@ -28,8 +28,8 @@
                 <option value="expert level">Expert Level</option>
             </select>
 
-            <!-- Course Title Input -->
-            <label for="course_title">Course Title:</label>
+            <!-- Course Title Input --><br>
+            <label for="course_title"><b>Course Title:</b></label>
             <input type="text" name="course_title" id="course_title" placeholder="Enter Course Title"
                    value="{{ request.form['course_title'] if request.method == 'POST' else '' }}" required>
 

@@ -5,7 +5,7 @@
 {% block content %}
     <div class="container">
         <br><br>
-        <h2>Recommended Videos for Improving Communication Skills</h2>
+        <h2 class="highlighted-heading">Recommended Videos for Improving Communication Skills</h2>
         <p>Enhance your communication skills with these handpicked YouTube videos.</p>
         
         <div class="videos-container">
@@ -17,9 +17,13 @@
                 </div>
             {% endfor %}
         </div>
+        
+        <br><br>
+        <h2 class="highlighted-heading">Free Course on Communication Skills</h2>
+        <p>Check out this <a href="https://www.alexanderlyon.com/free-resources" target="_blank" class="btn">free course</a> by Alexander Lyon to improve your communication skills.</p>
 
         <br><br>
-        <h2>Recommended Blogs & Websites</h2>
+        <h2 class="highlighted-heading">Recommended Blogs & Websites</h2>
         <div class="resources-container">
             <div class="resource-card">
                 <img src="{{ url_for('static', filename='mind_tools_logo.jpeg') }}" alt="MindTools">
@@ -40,10 +44,6 @@
                 <a href="https://www.skillsyouneed.com" target="_blank" class="btn">Visit</a>
             </div>
         </div>
-
-        <br><br>
-        <h2>Free Course on Communication Skills</h2>
-        <p>Check out this <a href="https://www.alexanderlyon.com/free-resources" target="_blank" class="btn">free course</a> by Alexander Lyon to improve your communication skills.</p>
     </div>
     <br><br>
 
@@ -52,6 +52,13 @@
             max-width: 900px;
             margin: auto;
             text-align: center;
+        }
+
+        .highlighted-heading {
+            background-color: #42ee9e;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
         }
 
         .videos-container {
@@ -84,7 +91,6 @@
             margin-top: 10px;
         }
 
-        
         .resources-container {
             display: flex;
             justify-content: space-between;
