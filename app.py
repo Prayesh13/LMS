@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from recommendation_skills_coursera import recommend_courses_pipeline
-from recomm_udemy import hybrid_recommendation
+from recomm_udemy import get_recommendations
 
 app = Flask(__name__)
 
@@ -46,15 +46,14 @@ def udemy_recommendation():
     user_level = ""
 
     if request.method == 'POST':
-        # Get user inputs from form
-        user_query = request.form.get('course_title')  
-        user_subject = request.form.get('subject')
-        user_level = request.form.get('level')
-        
-        if user_query and user_subject and user_level:
-            # Assuming `recommend_udemy_courses` is a function that returns recommended courses based on the input
-            recommended_courses = hybrid_recommendation(user_query, user_subject, user_level, top_n=6)
-    
+        # Get user inputs from form 
+        user_subject = request.form.get('subject', "").strip()
+        user_level = request.form.get('level', "").strip()
+
+        # Ensure at least subject and level are provided
+        if user_subject and user_level:
+            recommended_courses = get_recommendations(subject=user_subject, level=user_level, top_n=6)
+
     return render_template('udemy_recommendation.html', 
                            courses=recommended_courses, 
                            user_query=user_query, 

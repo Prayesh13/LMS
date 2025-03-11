@@ -11,30 +11,32 @@
             <!-- Subject Dropdown -->
             <label for="subject"><b>Subject:</b></label>
             <select name="subject" id="subject" required>
-                <option value="">Select Subject</option>
-                <option value="business finance">Business Finance</option>
-                <option value="graphic design">Graphic Design</option>
-                <option value="musical instruments">Musical Instruments</option>
-                <option value="web development">Web Development</option>
+                <option value="" {% if user_subject == "" %}selected{% endif %}>Select Subject</option>
+                <option value="business finance" {% if user_subject == "business finance" %}selected{% endif %}>Business Finance</option>
+                <option value="graphic design" {% if user_subject == "graphic design" %}selected{% endif %}>Graphic Design</option>
+                <option value="musical instruments" {% if user_subject == "musical instruments" %}selected{% endif %}>Musical Instruments</option>
+                <option value="web development" {% if user_subject == "web development" %}selected{% endif %}>Web Development</option>
             </select>
 
             <!-- Level Dropdown --><br>
             <label for="level"><b>Level:</b></label>
             <select name="level" id="level" required>
-                <option value="">Select Level</option>
-                <option value="all levels">All Levels</option>
-                <option value="intermediate level">Intermediate Level</option>
-                <option value="beginner level">Beginner Level</option>
-                <option value="expert level">Expert Level</option>
+                <option value="" {% if user_level == "" %}selected{% endif %}>Select Level</option>
+                <option value="all levels" {% if user_level == "all levels" %}selected{% endif %}>All Levels</option>
+                <option value="intermediate level" {% if user_level == "intermediate level" %}selected{% endif %}>Intermediate Level</option>
+                <option value="beginner level" {% if user_level == "beginner level" %}selected{% endif %}>Beginner Level</option>
+                <option value="expert level" {% if user_level == "expert level" %}selected{% endif %}>Expert Level</option>
             </select>
-
-            <!-- Course Title Input --><br>
-            <label for="course_title"><b>Course Title:</b></label>
-            <input type="text" name="course_title" id="course_title" placeholder="Enter Course Title"
-                   value="{{ request.form['course_title'] if request.method == 'POST' else '' }}" required>
 
             <button type="submit"><h3>Get Recommendations</h3></button>
         </form>
+
+        <br>
+        {% if user_subject or user_level %}
+            <h4>Your Selection:</h4>
+            <p><strong>Subject:</strong> {{ user_subject | title }}</p>
+            <p><strong>Level:</strong> {{ user_level | title }}</p>
+        {% endif %}
 
         <br>
         {% if courses is not none %}
