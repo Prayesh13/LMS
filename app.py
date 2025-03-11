@@ -60,5 +60,13 @@ def udemy_recommendation():
                            user_subject=user_subject, 
                            user_level=user_level)
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/roadmaps')
+def roadmaps():
+    return render_template('roadmaps.html')
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

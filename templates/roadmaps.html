@@ -1,0 +1,128 @@
+{% extends 'layout.html' %}
+
+{% block title %}Roadmaps{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Explore Roadmaps</h2>
+    <p>Learn and grow with structured roadmaps for different technologies.</p>
+
+    <br><br>
+    <h3 class="highlight">Technology Based Roadmaps</h3>
+    <div class="roadmap-grid">
+        <a href="https://roadmap.sh/frontend" target="_blank" class="roadmap-btn">Frontend Developer</a>
+        <a href="https://roadmap.sh/backend" target="_blank" class="roadmap-btn">Backend Developer</a>
+        <a href="https://roadmap.sh/devops" target="_blank" class="roadmap-btn">DevOps Engineer</a>
+        <a href="https://roadmap.sh/full-stack" target="_blank" class="roadmap-btn">Full Stack Developer</a>
+        <a href="https://roadmap.sh/data-analyst" target="_blank" class="roadmap-btn">Data Analyst</a>
+        <a href="https://roadmap.sh/ai-data-scientist" target="_blank" class="roadmap-btn">AI & Data Scientist</a>
+        <a href="https://roadmap.sh/mlops" target="_blank" class="roadmap-btn">MLOps</a>
+        <a href="https://roadmap.sh/ai-engineer" target="_blank" class="roadmap-btn">AI Engineer</a>
+        <a href="https://roadmap.sh/android" target="_blank" class="roadmap-btn">Android</a>
+    </div>
+
+    <h3 class="highlight">Skill-Based Roadmaps</h3>
+    <div class="roadmap-grid">
+        <a href="https://roadmap.sh/react" target="_blank" class="roadmap-btn">React.js</a>
+        <a href="https://roadmap.sh/angular" target="_blank" class="roadmap-btn">Angular</a>
+        <a href="https://roadmap.sh/docker" target="_blank" class="roadmap-btn">Docker</a>
+        <a href="https://roadmap.sh/kubernetes" target="_blank" class="roadmap-btn">Kubernetes</a>
+        <a href="https://roadmap.sh/python" target="_blank" class="roadmap-btn">Python Developer</a>
+        <a href="https://roadmap.sh/javascript" target="_blank" class="roadmap-btn">JavaScript Developer</a>
+    </div>
+
+    <br><br>
+    <h3 class="highlight">Famous YouTube Roadmaps with courses</h3>
+    <div class="youtube-grid">
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/playlist?list=PLDzeHZWIZsTo0wSBcg4-NMIbC0L8evLrD" target="_blank">
+                <img src="https://i.ytimg.com/vi/Vi9bxu-M-ag/hqdefault.jpg?sqp=-oaymwEnCPYBEIoBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLACritBfQVG4iCPb9sIYwIDAGV1pA" alt="Frontend Roadmap">
+                <p>Full Stack Web Developer Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/watch?v=hlGoQC332VM&ab_channel=ApnaCollege" target="_blank">
+                <img src="https://i.ytimg.com/an_webp/hlGoQC332VM/mqdefault_6s.webp?du=3000&sqp=CN-bwL4G&rs=AOn4CLC17POSQEm50reFiyMvFKjjXUU9bg" alt="Backend Roadmap">
+                <p>SQL Full Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/live/UxrrDLf5SlQ?si=Ob2BuhxtrJ_D9Pmu" target="_blank">
+                <img src="https://i.ytimg.com/vi/UxrrDLf5SlQ/hqdefault.jpg?sqp=-oaymwEnCPYBEIoBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDFfoIPo9zlH7pYg-uM9uOc6PmYuQ" alt="Data Science Roadmap">
+                <p>Data Science Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://youtu.be/-dJPoLm_gtE?si=rlTscxVooYL1vNN2" target="_blank">
+                <img src="https://i.ytimg.com/vi/-dJPoLm_gtE/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBq44FecRBvQ73RKtUVQ7YpeQp6Zg" alt="MLOps Roadmap">
+                <p>MLOps Roadmap</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: auto;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .roadmap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .roadmap-btn {
+        text-decoration: none;
+        color: #ffffff;
+        background-color: #da00ea;
+        padding: 15px;
+        border-radius: 5px;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .roadmap-btn:hover {
+        background-color: #a400b3;
+    }
+
+    .youtube-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .youtube-card {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .youtube-card img {
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .youtube-card p {
+        margin: 10px 0 0;
+        font-weight: bold;
+    }
+
+    .highlight {
+        background-color: #3700b3;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
