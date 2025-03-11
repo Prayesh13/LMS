@@ -46,9 +46,9 @@
                     <div class="card">
                         <h4>{{ course["course_title"] | title }}</h4>
                         <p><strong>Subject:</strong> {{ course["subject"] }}</p>
-                        <p><strong>Paid:</strong> {{ 'Yes' if course["is_paid"] else 'No' }}</p>
                         <p><strong>Price:</strong> ${{ course["price"] }}</p>
                         <p><strong>Level:</strong> {{ course["level"] }}</p>
+                        <p><strong>Total Subscribers:</strong> {{ course["num_subscribers"] }}</p>
 
                         <a href="{{ course['url'] }}" target="_blank" class="btn">Course Link</a>
                     </div>
@@ -100,7 +100,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: left;
-            height: 380px; /* Set card height */
+            height: 250px; /* Set card height */
             position: relative;  /* Make sure button stays fixed */
             overflow: hidden;
         }
