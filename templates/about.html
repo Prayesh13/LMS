@@ -1,0 +1,114 @@
+{% extends 'layout.html' %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>About the Project</h2>
+        <p>Welcome to the Learning Management System (LMS) project, a platform designed to help users find the best online courses for their personal and professional growth. This system leverages machine learning and personalized recommendations to suggest relevant courses from platforms like Coursera and Udemy, based on users' skill sets and interests.</p>
+        
+        <h3>Project Overview</h3>
+        <p>The LMS is designed to provide personalized course recommendations to users, helping them make informed decisions about their learning paths. With past data of courses from Coursera and Udemy, the system uses recommendation algorithms such as content-based filtering and skills-based matching to recommend courses suited to the user's needs.</p>
+
+        <h3>Features</h3>
+        <ul>
+            <li><strong>Course Recommendations:</strong> Personalized recommendations based on the user's profile and skills.</li>
+            <li><strong>Skills Matrix:</strong> A curated matrix of skills to help guide learning paths.</li>
+            <li><strong>Integrated Learning Platforms:</strong> Course data from Coursera and Udemy for a broad selection of learning materials.</li>
+            <li><strong>Advanced Data Analytics:</strong> Data preprocessing and cleaning for better course recommendations.</li>
+        </ul>
+
+        <h3>Technologies Used</h3>
+        <p>This project is built using a variety of technologies to ensure a smooth user experience and powerful backend logic:</p>
+        <ul>
+            <li><strong>Python:</strong> For implementing recommendation algorithms and backend logic.</li>
+            <li><strong>Flask:</strong> Used for building the web application and serving the dynamic content.</li>
+            <li><strong>Machine Learning:</strong> For creating recommendation systems using tools like Scikit-learn and NLTK.</li>
+            <li><strong>HTML/CSS:</strong> For designing the frontend and ensuring a responsive design.</li>
+            <li><strong>TF-IDF:</strong> For text processing and vectorization of course descriptions and skills.</li>
+        </ul>
+
+        <h3>How It Works</h3>
+        <p>The recommendation system works by analyzing the course data and user input. By using Natural Language Processing (NLP) techniques, the system processes course descriptions and the skills required for each course. The system then matches these descriptions to the user's skills matrix, providing personalized course suggestions.</p>
+
+        <h3>Our Team</h3>
+        <ul>
+            <li><strong>Prayesh Godhani</strong></li>
+            <li><strong>Rohit Kunjadiya</strong></li>
+            <li><strong>Uttam Kheni</strong></li>
+            <li><strong>Meet Vekariya</strong></li>
+            <li><strong>Kapil Saroj</strong></li>
+        </ul>
+
+        <div class="contact-btn-container">
+            <a href="{{ url_for('contact') }}" class="btn btn-primary">Contact Us</a>
+        </div>
+    </div>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .container h2 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .container ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .container ul li {
+            font-size: 18px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: black;
+        }
+
+        .container h3 {
+            font-size: 28px;
+            color: #007bff;
+            margin-top: 30px;
+        }
+
+        .container strong {
+            font-weight: 600;
+        }
+
+        .contact-btn-container {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
