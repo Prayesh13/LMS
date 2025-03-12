@@ -1,0 +1,1392 @@
+#---------------------------- app.py ---------------------------------------------
+from flask import Flask, render_template, request
+from recommendation_skills_coursera import recommend_courses_pipeline
+from recomm_udemy import get_recommendations
+
+app = Flask(__name__)
+
+@app.route('/')
+@app.route('/home')
+def home():
+    return render_template('homepage.html')
+
+@app.route('/digital_footprints')
+def digital_footprints():
+    return render_template('digital_footprints.html')
+
+@app.route('/course-recommendation', methods=['GET', 'POST'])
+def course_recommendation():
+    recommended_courses = None
+    user_skills = ""
+    
+    if request.method == 'POST':
+        user_skills = request.form.get('skills')  # Get user input from form
+        if user_skills:
+            recommended_courses = recommend_courses_pipeline(user_skills, top_n=6, rating_threshold=4)
+    
+    return render_template('course_recommendation.html', courses=recommended_courses, user_skills=user_skills)
+
+
+@app.route('/communication-skills')
+def communication_skills():
+    # Placeholder for recommending YouTube videos
+    videos = [
+        {"title": "Communication Skills - The 6 Keys Of Powerful Communication", "url": "https://youtu.be/XCc6-qr0Gww?si=GaGwLr_o_R7QZ-hf","Channel": "Actualized.org"},
+        {"title": "Communication Skills SIMPLIFIED: A Step-by-Step Roadmap for Success", "url": "https://youtu.be/X3Fz_Gu5WUE?si=Id0rhYkGljNQzUPY","Channel": "Simerjeet Singh"},
+        {"title": "TOP 3 Tips To Improve Your Communication Skills!", "url": "https://youtu.be/LsyfrGnBL4c?si=sF5Zii9h4nTBy_ai","Channel": "Vanessa Van Edwards"},
+        {"title": "Effective Communication Skills", "url": "https://youtu.be/6pYSbdGiDYw?si=_rxUHf3Jdz5y7ESf","Channel": "Communication Coach Alexander Lyon"}
+    ]
+    return render_template('communication_skills.html', videos=videos)
+
+
+@app.route('/udemy-recommendation', methods=['GET', 'POST'])
+def udemy_recommendation():
+    recommended_courses = None
+    user_query = ""
+    user_subject = ""
+    user_level = ""
+
+    if request.method == 'POST':
+        # Get user inputs from form 
+        user_subject = request.form.get('subject', "").strip()
+        user_level = request.form.get('level', "").strip()
+
+        # Ensure at least subject and level are provided
+        if user_subject and user_level:
+            recommended_courses = get_recommendations(subject=user_subject, level=user_level, top_n=6)
+
+    return render_template('udemy_recommendation.html', 
+                           courses=recommended_courses, 
+                           user_query=user_query, 
+                           user_subject=user_subject, 
+                           user_level=user_level)
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/roadmaps')
+def roadmaps():
+    return render_template('roadmaps.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
+
+#---------------------------- recomm_udemy.py ---------------------------------------------
+import pandas as pd
+
+# Step 1: Define the get_data() function to load data
+def get_data(file_path="data/udemy_cleaned.csv"):
+    """
+    This function loads the CSV file containing Udemy courses data.
+    :param file_path: Path to the CSV file.
+    :return: A pandas DataFrame with the course data.
+    """
+    df = pd.read_csv(file_path)
+    
+    # Convert categorical text columns to lowercase for consistency
+    df['subject'] = df['subject'].str.lower()
+    df['level'] = df['level'].str.lower()
+    
+    # Select relevant features
+    df_filtered = df[['course_id', 'course_title', 'is_paid', 'num_subscribers', 'num_reviews', 'subject', 'level', 'content_duration', 'price', 'url']].copy()
+    
+    return df_filtered
+
+# Step 2: Collaborative Filtering (CF) Logic
+def collaborative_filtering(subject, level, top_n=5):
+    df_filtered = get_data()
+    
+    # Filter courses based on subject and level
+    cf_courses = df_filtered[
+        (df_filtered['subject'].str.contains(subject.lower(), case=False, na=False)) &
+        (df_filtered['level'].str.contains(level.lower(), case=False, na=False))
+    ]
+    
+    # Sort by number of subscribers and return top N
+    cf_courses = cf_courses.sort_values(by='num_subscribers', ascending=False).head(top_n)
+    
+    # Return relevant columns
+    return cf_courses[['course_id', 'course_title', 'subject', 'level', 'num_subscribers', 'price', 'url']]
+
+# Step 3: Recommendation Function
+def get_recommendations(subject=None, level=None, top_n=5):
+    if subject and level:
+        return collaborative_filtering(subject, level, top_n)
+    else:
+        return "Error: Please provide both `subject` and `level`."
+
+# ------------------------------ recommendation_skills_coursera.py --------------------------
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+
+def get_data():
+    df_cleaned = pd.read_csv("data/Coursera_cleaned.csv")
+    return df_cleaned
+
+# Step 1: Preprocessing the user input skills
+def preprocess_user_skills(user_skills):
+    # the input is a string
+    return " ".join(user_skills) if isinstance(user_skills, set) else user_skills
+
+# Step 2: Vectorize skills using TF-IDF
+def vectorize_skills(df):
+    tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+    skills_matrix = tfidf_vectorizer.fit_transform(df['Skills'])
+    return tfidf_vectorizer, skills_matrix
+
+# Step 3: Calculate cosine similarity between user skills and course skills
+def calculate_cosine_similarity(user_skills_vector, skills_matrix):
+    return cosine_similarity(user_skills_vector, skills_matrix)
+
+# Step 4: Filter and rank courses based on similarity and rating
+def filter_and_rank_courses(df, sim_scores, rating_threshold=4, top_n=5):
+    # Sort the courses based on similarity scores
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[:top_n]  # Get top N similar courses
+
+    # Extract course indices
+    course_indices = [i[0] for i in sim_scores]
+    
+    # Get the courses corresponding to the indices
+    recommended_courses = df.iloc[course_indices]
+    
+    # Apply rating threshold (filter courses with ratings below the threshold)
+    recommended_courses = recommended_courses[recommended_courses['Rating'] >= rating_threshold]
+    
+    # Sort by rating (descending)
+    recommended_courses = recommended_courses.sort_values(by='Rating', ascending=False)
+    
+    return recommended_courses[['Name', 'University', 'Difficulty Level', 'Rating', 'URL','Description', 'Skills']]
+
+# Step 5: Combine all steps into a pipeline
+def recommend_courses_pipeline(user_skills, top_n=5, rating_threshold=4):
+    try:
+        # get the data
+        df = get_data()
+        # Preprocess the user input skills
+        user_skills = preprocess_user_skills(user_skills)
+
+        # Vectorize skills and calculate similarity
+        tfidf_vectorizer, skills_matrix = vectorize_skills(df)
+        user_skills_vector = tfidf_vectorizer.transform([user_skills])  # Convert user skills to vector
+        cosine_sim = calculate_cosine_similarity(user_skills_vector, skills_matrix)
+
+        # Get the top N recommended courses based on skills similarity and rating
+        recommended_courses = filter_and_rank_courses(df, list(enumerate(cosine_sim[0])), rating_threshold, top_n)
+        
+        return recommended_courses
+    
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+
+# # enter user skills
+# user_skills = "communication"
+
+# recommended_courses = recommend_courses_pipeline(user_skills=user_skills, top_n=5, rating_threshold=4)
+
+# print(recommended_courses)
+
+# ------------------------------------------- requirements.txt --------------------------
+flask
+pandas
+numpy
+gunicorn
+scikit-learn
+fuzzywuzzy
+
+# ----------------------------------- about.html --------------------------------------
+{% extends 'layout.html' %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>About the Project</h2>
+        <p>Welcome to the Learning Management System (LMS) project, a platform designed to help users find the best online courses for their personal and professional growth. This system leverages machine learning and personalized recommendations to suggest relevant courses from platforms like Coursera and Udemy, based on users' skill sets and interests.</p>
+        
+        <h3>Project Overview</h3>
+        <p>The LMS is designed to provide personalized course recommendations to users, helping them make informed decisions about their learning paths. With past data of courses from Coursera and Udemy, the system uses recommendation algorithms such as content-based filtering and skills-based matching to recommend courses suited to the user's needs.</p>
+
+        <h3>Features</h3>
+        <ul>
+            <li><strong>Course Recommendations:</strong> Personalized recommendations based on the user's profile and skills.</li>
+            <li><strong>Skills Matrix:</strong> A curated matrix of skills to help guide learning paths.</li>
+            <li><strong>Integrated Learning Platforms:</strong> Course data from Coursera and Udemy for a broad selection of learning materials.</li>
+            <li><strong>Advanced Data Analytics:</strong> Data preprocessing and cleaning for better course recommendations.</li>
+        </ul>
+
+        <h3>Technologies Used</h3>
+        <p>This project is built using a variety of technologies to ensure a smooth user experience and powerful backend logic:</p>
+        <ul>
+            <li><strong>Python:</strong> For implementing recommendation algorithms and backend logic.</li>
+            <li><strong>Flask:</strong> Used for building the web application and serving the dynamic content.</li>
+            <li><strong>Machine Learning:</strong> For creating recommendation systems using tools like Scikit-learn and NLTK.</li>
+            <li><strong>HTML/CSS:</strong> For designing the frontend and ensuring a responsive design.</li>
+            <li><strong>TF-IDF:</strong> For text processing and vectorization of course descriptions and skills.</li>
+        </ul>
+
+        <h3>How It Works</h3>
+        <p>The recommendation system works by analyzing the course data and user input. By using Natural Language Processing (NLP) techniques, the system processes course descriptions and the skills required for each course. The system then matches these descriptions to the user's skills matrix, providing personalized course suggestions.</p>
+
+        <h3>Our Team</h3>
+        <ul>
+            <li><strong>Prayesh Godhani</strong></li>
+            <li><strong>Rohit Kunjadiya</strong></li>
+            <li><strong>Uttam Kheni</strong></li>
+            <li><strong>Meet Vekariya</strong></li>
+            <li><strong>Kapil Saroj</strong></li>
+        </ul>
+
+        <div class="contact-btn-container">
+            <a href="{{ url_for('contact') }}" class="btn btn-primary">Contact Us</a>
+        </div>
+    </div>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .container h2 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .container ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .container ul li {
+            font-size: 18px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: black;
+        }
+
+        .container h3 {
+            font-size: 28px;
+            color: #007bff;
+            margin-top: 30px;
+        }
+
+        .container strong {
+            font-weight: 600;
+        }
+
+        .contact-btn-container {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
+# ------------------------------ communication_skills.html ----------------------------
+{% extends 'layout.html' %}
+
+{% block title %}Communication Skills{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br><br>
+        <h2 class="highlighted-heading">Recommended Videos for Improving Communication Skills</h2>
+        <p>Enhance your communication skills with these handpicked YouTube videos.</p>
+        
+        <div class="videos-container">
+            {% for video in videos %}
+                <div class="video-card">
+                    <h4>{{ video.title }}</h4>
+                    <h5>{{ video.Channel }}</h5>
+                    <a href="{{ video.url }}" target="_blank" class="btn">Watch Video</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <br><br>
+        <h2 class="highlighted-heading">Free Course on Communication Skills</h2>
+        <p>Check out this <a href="https://www.alexanderlyon.com/free-resources" target="_blank" class="btn">free course</a> by Alexander Lyon to improve your communication skills.</p>
+
+        <br><br>
+        <h2 class="highlighted-heading">Recommended Blogs & Websites</h2>
+        <div class="resources-container">
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='mind_tools_logo.jpeg') }}" alt="MindTools">
+                <h4>MindTools</h4>
+                <p>Offers communication strategies for professionals.</p>
+                <a href="https://www.mindtools.com" target="_blank" class="btn">Visit</a>
+            </div>
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='Harvard_business_review.jpg') }}" alt="HBR">
+                <h4>Harvard Business Review (HBR)</h4>
+                <p>Articles on leadership and communication.</p>
+                <a href="https://hbr.org" target="_blank" class="btn">Visit</a>
+            </div>
+            <div class="resource-card">
+                <img src="{{ url_for('static', filename='skillsyouneed.jpg') }}" alt="SkillsYouNeed">
+                <h4>SkillsYouNeed</h4>
+                <p>Free guides on communication skills.</p>
+                <a href="https://www.skillsyouneed.com" target="_blank" class="btn">Visit</a>
+            </div>
+        </div>
+    </div>
+    <br><br>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .highlighted-heading {
+            background-color: #42ee9e;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .videos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .video-card, .resource-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .video-card h4, .resource-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .resources-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .resource-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .resource-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 30%;
+        }
+    </style>
+{% endblock %}
+
+
+# --------------------------------- contact.html -------------------------
+{% extends 'layout.html' %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Contact Us</h2>
+        <p>Have questions? Reach out to us!</p>
+        
+        <div class="contact-info">
+            <h3>GitHub Profile</h3>
+            <p><a href="https://github.com/Prayesh13" target="_blank"><u>Profile Link</u></a></p>
+            
+            <h3>Team Members</h3>
+            <ul>
+                <li><strong>Prayesh Godhani</strong> - <a href="mailto:prayeshgodhani.aids21@scet.ac.in">prayeshgodhani.aids21@scet.ac.in</a></li>
+                <li><strong>Rohit Kunjadiya</strong> - <a href="mailto:rohitkumarkunjadiya.aids21@scet.ac.in">rohitkumarkunjadiya.aids21@scet.ac.in</a></li>
+                <li><strong>Uttam Kheni</strong> - <a href="mailto:uttamkheni.it21@scet.ac.in">uttamkheni.it21@scet.ac.in</a></li>
+                <li><strong>Meet Vekariya</strong> - <a href="mailto:meetvekariya.it21@scet.ac.in">meetvekariya.it21@scet.ac.in</a></li>
+                <li><strong>Kapil Saroj</strong> - <a href="mailto:kapilsaroj01@gmail.com">kapilsaroj01@gmail.com</a></li>
+            </ul>
+        
+        </div>
+    </div>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .container h2 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .contact-info {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .contact-info h3 {
+            font-size: 24px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .contact-info ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .contact-info ul li {
+            font-size: 18px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .contact-info a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-info p {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .contact-info strong {
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .container h2 {
+                font-size: 30px;
+            }
+
+            .contact-info h3 {
+                font-size: 22px;
+            }
+
+            .contact-info ul li {
+                font-size: 16px;
+            }
+
+            .contact-info p {
+                font-size: 16px;
+            }
+        }
+    </style>
+{% endblock %}
+
+
+# ------------------------------------ course_recommendation.html ---------------------------
+{% extends 'layout.html' %}
+
+{% block title %}Course Recommendation{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <h2>Enter Skills :</h2>
+        <br>
+        <form method="post" class="form">
+            <input type="text" name="skills" placeholder="Enter skills (e.g., Python, Machine Learning)" 
+                   value="{{ request.form['skills'] if request.method == 'POST' else '' }}" required>
+            <button type="submit"><h3>Get Recommendations</h3></button>
+        </form>
+        
+        <br>
+        {% if courses is not none %}
+            <h3>Recommended Courses (Coursera)</h3>
+            <div class="cards-container">
+                {% for index, course in courses.iterrows() %}
+                    <div class="card" id="card-{{ index }}">
+                        <h4>{{ course["Name"] | title }}</h4>
+                        <p><strong>University:</strong> {{ course["University"] }}</p>
+                        <p><strong>Difficulty:</strong> {{ course["Difficulty Level"] }}</p>
+                        <p><strong>Rating:</strong> {{ course["Rating"] }}</p>
+                        <p><strong>Skills:</strong> {{ course["Skills"] }}</p>
+                        
+                        <p class="course-description" id="desc-{{ index }}">
+                            <strong>Description:</strong>
+                            <span id="dots-{{ index }}">...</span>
+                            <span id="more-{{ index }}" style="display: none;">{{ course["Description"] }}</span>
+                        </p>
+                        <button onclick="toggleReadMore({{ index }})" id="btn-{{ index }}">Read more</button>
+                        
+                        <a href="{{ course['URL'] }}" target="_blank" class="btn">Course Link</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>Disclaimer:</strong> Please note that the prices and course details displayed here are based on past data. Current prices and availability may differ. Always verify the details directly on the official website.</p>
+    </div>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .form input {
+            padding: 10px;
+            width: 70%;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .form button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .card.expanded {
+            transform: scale(1.2);
+            z-index: 10;
+            height: auto;
+        }
+
+        .card h4 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        .card p {
+            color: #555;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            width: calc(100% - 30px);
+        }
+
+        .read-more {
+            color: #007bff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        function toggleReadMore(index) {
+            var dots = document.getElementById("dots-" + index);
+            var moreText = document.getElementById("more-" + index);
+            var btnText = document.getElementById("btn-" + index);
+
+            if (dots.style.display === "none") {
+                dots.style.display = "inline";
+                moreText.style.display = "none";
+                btnText.innerText = "Read more";
+            } else {
+                dots.style.display = "none";
+                moreText.style.display = "inline";
+                btnText.innerText = "Read less";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const cards = document.querySelectorAll(".card");
+
+            cards.forEach(card => {
+                card.addEventListener("click", function (event) {
+                    cards.forEach(c => {
+                        if (c !== card) {
+                            c.classList.remove("expanded");
+                        }
+                    });
+
+                    card.classList.toggle("expanded");
+                    event.stopPropagation();
+                });
+            });
+
+            document.addEventListener("click", function () {
+                cards.forEach(card => card.classList.remove("expanded"));
+            });
+        });
+    </script>
+{% endblock %}
+
+# ----------------------------------------------- digital_footprnt.html ---------------------------------------
+{% extends "layout.html" %}
+
+{% block title %}Digital Footprint - MentorX{% endblock %}
+
+{% block content %}
+<section class="content">
+    <h2>Understanding Digital Footprint</h2>
+    <p>Your digital footprint is the trail of data you leave behind while using the internet. This includes social media activity and shared content.</p>
+
+    <h3>Why It Matters</h3>
+    <p>Understanding your digital footprint helps you manage and create a positive online presence.</p>
+    
+    <h3>Building a Strong Online Presence for Your Career</h3>
+    <p>Students should create accounts on the following platforms to build their digital identity and career opportunities:</p>
+
+    <div class="cards-container">
+        <div class="card">
+            <h4>LinkedIn</h4>
+            <p>LinkedIn is a professional networking platform that allows you to showcase your skills, connect with industry professionals, and explore job opportunities.</p>
+            <a href="https://www.linkedin.com" target="_blank" class="btn">Visit LinkedIn</a>
+        </div>
+
+        <div class="card">
+            <h4>GitHub</h4>
+            <p>GitHub is a platform for version control and collaborative coding projects. It’s essential for students and professionals in the tech field to showcase their code, contribute to open-source projects, and build a strong portfolio.</p>
+            <a href="https://github.com" target="_blank" class="btn">Visit GitHub</a>
+        </div>
+
+        <div class="card">
+            <h4>Naukri</h4>
+            <p>Naukri.com is one of India's largest job portals where you can upload your resume, explore job openings, and connect with recruiters.</p>
+            <a href="https://www.naukri.com" target="_blank" class="btn">Visit Naukri</a>
+        </div>
+
+        <div class="card">
+            <h4>Hugging Face</h4>
+            <p>Hugging Face is a platform for sharing and collaborating on machine learning models, particularly in Natural Language Processing.</p>
+            <a href="https://huggingface.co" target="_blank" class="btn">Visit Hugging Face</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+# ------------------------------------------------------ homepage.html --------------------------------------
+{% extends "layout.html" %}
+
+{% block title %}Home - LMS Portal{% endblock %}
+
+{% block content %}
+<section class="hero" style="width: 100vw; max-width: 100%; padding: 50px 0; text-align: center;">
+    <div class="content" style="width: 90%; margin: 0 auto;">
+        <h1>Building the Future!</h1>
+        <h2 style="font-size: 3rem;">Skills.<br>Progress.<br>Success.</h2>
+        <p>Hey engineers! Feeling overwhelmed by too much information? Wondering how to turn it into a successful career?  
+        Our Student Partner LMS is designed to guide you through skill-based learning, personalized course recommendations, and hands-on skill-building.  
+        Gain hands-on experience, refine your expertise, and confidently transition from classroom to career.  
+        Let’s make your engineering dreams a reality!</p>
+        <a href="{{ url_for('digital_footprints') }}" class="btn">Get Started</a>
+    </div>
+</section>
+{% endblock %}
+
+
+# --------------------------------------------- layout.html ---------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LMS Portal{% endblock %}</title>
+    
+    <link rel="icon" href="{{ url_for('static', filename='fav.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='esp_logo.png') }}" alt="ESP Logo" style="height: 50px;">
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <div class="nav-item">
+                <a href="#services">Services</a>
+                <div class="dropdown">
+                    <a href="{{ url_for('digital_footprints') }}">Digital footprint</a>
+                    <a href="{{ url_for('course_recommendation') }}">Coursera Course Recommendation</a>
+                    <a href="{{ url_for('udemy_recommendation') }}">Udemy Course Recommendation</a>
+                    <a href="{{ url_for('roadmaps') }}">Roadmaps</a>
+                    <a href="{{ url_for('communication_skills') }}">Comm. skills</a>
+                    
+                </div>
+            </div>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+    </header>
+    
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
+
+# ------------------------------------------------ roadmap.html --------------------------
+{% extends 'layout.html' %}
+
+{% block title %}Roadmaps{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Explore Roadmaps</h2>
+    <p>Learn and grow with structured roadmaps for different technologies.</p>
+
+    <br><br>
+    <h3 class="highlight">Technology Based Roadmaps</h3>
+    <div class="roadmap-grid">
+        <a href="https://roadmap.sh/frontend" target="_blank" class="roadmap-btn">Frontend Developer</a>
+        <a href="https://roadmap.sh/backend" target="_blank" class="roadmap-btn">Backend Developer</a>
+        <a href="https://roadmap.sh/devops" target="_blank" class="roadmap-btn">DevOps Engineer</a>
+        <a href="https://roadmap.sh/full-stack" target="_blank" class="roadmap-btn">Full Stack Developer</a>
+        <a href="https://roadmap.sh/data-analyst" target="_blank" class="roadmap-btn">Data Analyst</a>
+        <a href="https://roadmap.sh/ai-data-scientist" target="_blank" class="roadmap-btn">AI & Data Scientist</a>
+        <a href="https://roadmap.sh/mlops" target="_blank" class="roadmap-btn">MLOps</a>
+        <a href="https://roadmap.sh/ai-engineer" target="_blank" class="roadmap-btn">AI Engineer</a>
+        <a href="https://roadmap.sh/android" target="_blank" class="roadmap-btn">Android</a>
+    </div>
+
+    <h3 class="highlight">Skill-Based Roadmaps</h3>
+    <div class="roadmap-grid">
+        <a href="https://roadmap.sh/react" target="_blank" class="roadmap-btn">React.js</a>
+        <a href="https://roadmap.sh/angular" target="_blank" class="roadmap-btn">Angular</a>
+        <a href="https://roadmap.sh/docker" target="_blank" class="roadmap-btn">Docker</a>
+        <a href="https://roadmap.sh/kubernetes" target="_blank" class="roadmap-btn">Kubernetes</a>
+        <a href="https://roadmap.sh/python" target="_blank" class="roadmap-btn">Python Developer</a>
+        <a href="https://roadmap.sh/javascript" target="_blank" class="roadmap-btn">JavaScript Developer</a>
+    </div>
+
+    <br><br>
+    <h3 class="highlight">Famous YouTube Roadmaps with courses</h3>
+    <div class="youtube-grid">
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/playlist?list=PLDzeHZWIZsTo0wSBcg4-NMIbC0L8evLrD" target="_blank">
+                <img src="https://i.ytimg.com/vi/Vi9bxu-M-ag/hqdefault.jpg?sqp=-oaymwEnCPYBEIoBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLACritBfQVG4iCPb9sIYwIDAGV1pA" alt="Frontend Roadmap">
+                <p>Full Stack Web Developer Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/watch?v=hlGoQC332VM&ab_channel=ApnaCollege" target="_blank">
+                <img src="https://i.ytimg.com/an_webp/hlGoQC332VM/mqdefault_6s.webp?du=3000&sqp=CN-bwL4G&rs=AOn4CLC17POSQEm50reFiyMvFKjjXUU9bg" alt="Backend Roadmap">
+                <p>SQL Full Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://www.youtube.com/live/UxrrDLf5SlQ?si=Ob2BuhxtrJ_D9Pmu" target="_blank">
+                <img src="https://i.ytimg.com/vi/UxrrDLf5SlQ/hqdefault.jpg?sqp=-oaymwEnCPYBEIoBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDFfoIPo9zlH7pYg-uM9uOc6PmYuQ" alt="Data Science Roadmap">
+                <p>Data Science Roadmap</p>
+            </a>
+        </div>
+        <div class="youtube-card">
+            <a href="https://youtu.be/-dJPoLm_gtE?si=rlTscxVooYL1vNN2" target="_blank">
+                <img src="https://i.ytimg.com/vi/-dJPoLm_gtE/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBq44FecRBvQ73RKtUVQ7YpeQp6Zg" alt="MLOps Roadmap">
+                <p>MLOps Roadmap</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: auto;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .roadmap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .roadmap-btn {
+        text-decoration: none;
+        color: #ffffff;
+        background-color: #da00ea;
+        padding: 15px;
+        border-radius: 5px;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .roadmap-btn:hover {
+        background-color: #a400b3;
+    }
+
+    .youtube-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .youtube-card {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .youtube-card img {
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .youtube-card p {
+        margin: 10px 0 0;
+        font-weight: bold;
+    }
+
+    .highlight {
+        background-color: #3700b3;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+# --------------------------------- udemy_recommendation.html ----------------------------------
+{% extends 'layout.html' %}
+
+{% block title %}Udemy Course Recommendation{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <h2>Enter Course Preferences</h2>
+        <br>
+        <form method="post" class="form">
+            <!-- Subject Dropdown -->
+            <label for="subject"><b>Subject:</b></label>
+            <select name="subject" id="subject" required>
+                <option value="" {% if user_subject == "" %}selected{% endif %}>Select Subject</option>
+                <option value="business finance" {% if user_subject == "business finance" %}selected{% endif %}>Business Finance</option>
+                <option value="graphic design" {% if user_subject == "graphic design" %}selected{% endif %}>Graphic Design</option>
+                <option value="musical instruments" {% if user_subject == "musical instruments" %}selected{% endif %}>Musical Instruments</option>
+                <option value="web development" {% if user_subject == "web development" %}selected{% endif %}>Web Development</option>
+            </select>
+
+            <!-- Level Dropdown --><br>
+            <label for="level"><b>Level:</b></label>
+            <select name="level" id="level" required>
+                <option value="" {% if user_level == "" %}selected{% endif %}>Select Level</option>
+                <option value="all levels" {% if user_level == "all levels" %}selected{% endif %}>All Levels</option>
+                <option value="intermediate level" {% if user_level == "intermediate level" %}selected{% endif %}>Intermediate Level</option>
+                <option value="beginner level" {% if user_level == "beginner level" %}selected{% endif %}>Beginner Level</option>
+                <option value="expert level" {% if user_level == "expert level" %}selected{% endif %}>Expert Level</option>
+            </select>
+
+            <button type="submit"><h3>Get Recommendations</h3></button>
+        </form>
+
+        <br>
+        {% if user_subject or user_level %}
+            <h4>Your Selection:</h4>
+            <p><strong>Subject:</strong> {{ user_subject | title }}</p>
+            <p><strong>Level:</strong> {{ user_level | title }}</p>
+        {% endif %}
+
+        <br>
+        {% if courses is not none %}
+            <h3>Recommended Courses (Udemy)</h3>
+            <div class="cards-container">
+                {% for index, course in courses.iterrows() %}
+                    <div class="card">
+                        <h4>{{ course["course_title"] | title }}</h4>
+                        <p><strong>Subject:</strong> {{ course["subject"] }}</p>
+                        <p><strong>Price:</strong> ${{ course["price"] }}</p>
+                        <p><strong>Level:</strong> {{ course["level"] }}</p>
+                        <p><strong>Total Subscribers:</strong> {{ course["num_subscribers"] }}</p>
+
+                        <a href="{{ course['url'] }}" target="_blank" class="btn">Course Link</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>Disclaimer:</strong> Please note that the prices and course details displayed here are based on past data. Current prices and availability may differ. Always verify the details directly on the official website.</p>
+    </div>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .form select, .form input {
+            padding: 10px;
+            width: 70%;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .form button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);  /* 3 cards per row */
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            height: 250px; /* Set card height */
+            position: relative;  /* Make sure button stays fixed */
+            overflow: hidden;
+        }
+
+        .card h4 {
+            margin: 0 0 10px;
+            color: #333; /* Adjusted color for headings */
+        }
+
+        .card p {
+            color: #555; /* Adjusted color for paragraphs */
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            position: absolute;
+            bottom: 15px;  /* Fix the button at the bottom */
+            left: 15px;
+            width: calc(100% - 30px);  /* Make button full width minus padding */
+        }
+
+        .disclaimer {
+            margin-top: 40px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .disclaimer p {
+            margin: 0;
+        }
+    </style>
+{% endblock %}
+
+
+# ------------------------------------- style.css -----------------------------------------
+/* Reset Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #6e0dad, #23074d);
+    color: white;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: linear-gradient(135deg, #b06cdd, #6d28d4);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar a, .nav-item > a {
+    text-decoration: none;
+    color: white;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.navbar a:hover, .nav-item > a:hover {
+    color: #ffbf00;
+    transform: scale(1.1);
+}
+
+/* Dropdown Menu */
+.nav-item {
+    position: relative;
+}
+
+.nav-item:hover .dropdown {
+    display: block;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    background-color: #290042;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown a {
+    color: rgb(247, 251, 236);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {
+    background-color: #575757;
+}
+
+/* Hero Section */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 50px;
+    background: linear-gradient(135deg, rgba(255, 91, 91, 0.6), rgba(114, 75, 217, 0.7));
+    overflow: hidden;
+    position: relative;
+}
+
+.hero .content {
+    max-width: 50%;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.hero p {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.hero .btn {
+    background: #ffbf00;
+    color: #23074d;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero .btn:hover {
+    background: #d4a000;
+    transform: translateY(-4px);
+}
+
+.hero .btn:active {
+    transform: translateY(2px);
+}
+
+/* Cards for Platforms */
+.cards-section {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 50px;
+}
+
+.card {
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 300px;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    color: #ffbf00;
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 1rem;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.card a {
+    color: #ffbf00;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.card a:hover {
+    color: #ff9000;
+}
+
+.card .suggestion {
+    font-size: 1rem;
+    color: #f7f7f7;
+    margin-top: 15px;
+}
+
+/* Content Section */
+.content {
+    max-width: 80%;
+    margin: 50px auto;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.content h2, .content h3 {
+    color: #ffbf00;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+    margin-bottom: 15px;
+}
+
+.content p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.content ul, .content ol {
+    margin-left: 25px;
+    padding-left: 20px;
+}
+
+.content ul li, .content ol li {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.content ul li::marker {
+    color: #ffbf00;
+}
+
+.content ol li {
+    counter-increment: step-counter;
+}
+
+.content ol li::before {
+    content: counter(step-counter) ". ";
+    font-weight: bold;
+    color: #ffbf00;
+}
+
+/* Cards in one row */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 cards in one row */
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.card {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.card h4 {
+    color: #ffbf00;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.card .btn {
+    background: #ffbf00;
+    color: #23074d;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.card .btn:hover {
+    background: #d43100;
+    transform: translateY(-4px);
+}
+
+.card .btn:active {
+    transform: translateY(2px);
+}
+
+@media (max-width: 1024px) {
+    .cards-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row for tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .cards-container {
+        grid-template-columns: 1fr; /* 1 card per row for mobile */
+    }
+}
