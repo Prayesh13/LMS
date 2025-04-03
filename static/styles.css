@@ -18,7 +18,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 50px;
-    background: linear-gradient(135deg, #b06cdd, #6d28d4);
+    background: linear-gradient(135deg, #866cdd, #050091b4);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -77,14 +77,15 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 0 50px;
-    background: linear-gradient(135deg, rgba(255, 91, 91, 0.6), rgba(114, 75, 217, 0.7));
+    /* background: linear-gradient(135deg, #866cdd, #050091b4); */
     overflow: hidden;
     position: relative;
 }
 
 .hero .content {
-    max-width: 50%;
+    max-width: 90%;
     z-index: 2;
+    margin-top: 2px;
 }
 
 .hero h1 {
@@ -177,7 +178,7 @@ body {
 
 /* Content Section */
 .content {
-    max-width: 80%;
+    max-width: 90%;
     margin: 50px auto;
     background: rgba(0, 0, 0, 0.4);
     padding: 30px;

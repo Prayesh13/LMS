@@ -40,15 +40,41 @@
     </div>
 
     <div class="disclaimer">
-        <p><strong>Disclaimer:</strong> Please note that the prices and course details displayed here are based on past data. Current prices and availability may differ. Always verify the details directly on the official website.</p>
+        <p><strong>&#9888; Disclaimer:</strong> Please note that the prices and course details displayed here are based on past data. Current prices and availability may differ. Always verify the details directly on the official website.</p>
     </div>
+    
 
     <style>
+        body {
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+        }
         .container {
             max-width: 900px;
             margin: auto;
             text-align: center;
         }
+        .disclaimer {
+            position: absolute; /* This will position the div relative to the viewport */
+            top: 38%; /* Positions the div in the middle vertically */
+            left: 50%; /* Positions the div in the middle horizontally */
+            transform: translate(-50%, -50%); /* Adjusts the div to be exactly centered */
+            background-color: rgba(255, 255, 255, 0.8); /* Optional: background for readability */
+            padding: 20px; /* Add some padding for spacing */
+            border-radius: 10px; /* Optional: rounded corners */
+            width: 80%; /* Optional: control width of the disclaimer box */
+            max-width: 600px; /* Optional: limit the maximum width */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: add shadow for effect */
+            text-align: center; /* Centers the text inside */
+        }
+
+        .disclaimer p {
+            font-size: 1rem; /* Optional: set font size */
+            color: #333; /* Optional: change text color */
+        }
+
 
         .form input {
             padding: 10px;

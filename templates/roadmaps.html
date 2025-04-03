@@ -42,7 +42,7 @@
         </div>
         <div class="youtube-card">
             <a href="https://www.youtube.com/watch?v=hlGoQC332VM&ab_channel=ApnaCollege" target="_blank">
-                <img src="https://i.ytimg.com/an_webp/hlGoQC332VM/mqdefault_6s.webp?du=3000&sqp=CN-bwL4G&rs=AOn4CLC17POSQEm50reFiyMvFKjjXUU9bg" alt="Backend Roadmap">
+                <img src="{{ url_for('static', filename='image.png') }}" alt="Backend Roadmap">
                 <p>SQL Full Roadmap</p>
             </a>
         </div>
@@ -62,11 +62,20 @@
 </div>
 
 <style>
+    body {
+        background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+        background-size: cover; /* Ensure the background image covers the whole page */
+        background-position: center center; /* Center the image */
+        background-attachment: fixed; /* Make the background fixed when scrolling */
+    }
+
     .container {
         max-width: 900px;
         margin: auto;
         text-align: center;
         padding: 20px;
+        /* background: rgba(255, 255, 255, 0.8); Add a slight white background for readability */
+        /* border-radius: 10px; */
     }
 
     .roadmap-grid {
@@ -79,7 +88,7 @@
     .roadmap-btn {
         text-decoration: none;
         color: #ffffff;
-        background-color: #da00ea;
+        background-color: #050091b4;
         padding: 15px;
         border-radius: 5px;
         display: inline-block;
@@ -90,7 +99,7 @@
     }
 
     .roadmap-btn:hover {
-        background-color: #a400b3;
+        background-color: #088de1;
     }
 
     .youtube-grid {

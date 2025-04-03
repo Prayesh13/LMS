@@ -26,15 +26,19 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f4f7fa;
+            background-color: #7bbaf99c;
             color: #333;
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
         }
 
         .container {
             max-width: 900px;
             margin: 50px auto;
             padding: 40px;
-            background-color: #fff;
+            background-color: #ffffffc0;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;

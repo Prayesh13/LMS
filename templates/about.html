@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container">
-        <h2>About the Project</h2>
+        <h2><b>About the Project</b></h2>
         <p>Welcome to the Learning Management System (LMS) project, a platform designed to help users find the best online courses for their personal and professional growth. This system leverages machine learning and personalized recommendations to suggest relevant courses from platforms like Coursera and Udemy, based on users' skill sets and interests.</p>
         
         <h3>Project Overview</h3>
@@ -46,13 +46,19 @@
     </div>
 
     <style>
+        body {
+                background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+                background-size: cover;
+                background-position: center center;
+                background-attachment: fixed;
+            }
         .container {
             max-width: 900px;
             margin: 50px auto;
             padding: 40px;
-            background-color: #fff;
+            background-color: #ffffffa5;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.404);
             text-align: left;
         }
 
@@ -64,7 +70,7 @@
 
         .container p {
             font-size: 18px;
-            color: #666;
+            color: #000000;
             line-height: 1.6;
             margin-bottom: 30px;
         }
