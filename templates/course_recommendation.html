@@ -15,7 +15,8 @@
         
         <br>
         {% if courses is not none %}
-            <h3>Recommended Courses (Coursera)</h3>
+        <div class="start">
+            <h2>Recommended Courses (Coursera)</h2>
             <div class="cards-container">
                 {% for index, course in courses.iterrows() %}
                     <div class="card" id="card-{{ index }}">
@@ -36,6 +37,7 @@
                     </div>
                 {% endfor %}
             </div>
+        </div>
         {% endif %}
     </div>
 
@@ -99,6 +101,9 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-top: 20px;
+        }
+        .start {
+            margin-top: 20%;
         }
 
         .card {

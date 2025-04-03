@@ -32,12 +32,17 @@
         </form>
 
         <br>
+        <br>
+        <br>
+        <br>
         {% if user_subject or user_level %}
             <h4>Your Selection:</h4>
             <p><strong>Subject:</strong> {{ user_subject | title }}</p>
             <p><strong>Level:</strong> {{ user_level | title }}</p>
         {% endif %}
 
+        <br>
+        <br>
         <br>
         {% if courses is not none %}
             <h3>Recommended Courses (Udemy)</h3>
